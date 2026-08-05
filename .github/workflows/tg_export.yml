@@ -2,15 +2,15 @@ name: Telegram channel export
 
 on:
   schedule:
-    - cron: "0 * * * *"
-  workflow_dispatch:
+    - cron: "0 * * * *"   # запуск каждый час
+  workflow_dispatch:       # ручной запуск
 
 jobs:
   export:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Set up Python
@@ -24,10 +24,14 @@ jobs:
 
       - name: Run export script
         env:
-          API_ID: ${{ secrets.API_ID }}
-          API_HASH: ${{ secrets.API_HASH }}
-          PHONE_NUMBER: ${{ secrets.PHONE_NUMBER }}
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
           CHANNEL_LINK: ${{ secrets.CHANNEL_LINK }}
           EXCEL_FILE: ${{ secrets.EXCEL_FILE }}
         run: |
           python tg_channel_to_excel.py
+
+      - name: Upload Excel artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: channel_export
+          path: ${{ secrets.EXCEL_FILE }}
