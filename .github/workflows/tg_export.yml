@@ -1,9 +1,9 @@
 name: Telegram channel export
 
 on:
+  workflow_dispatch:
   schedule:
-    - cron: "0 * * * *"   # запуск каждый час
-  workflow_dispatch:       # ручной запуск
+    - cron: "0 9 * * *"   # запуск каждый день в 09:00 UTC
 
 jobs:
   export:
@@ -12,6 +12,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -20,21 +22,26 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run export script
-        env:
-          API_ID: ${{ secrets.API_ID }}
-          API_HASH: ${{ secrets.API_HASH }}
-          SESSION_FILE: ${{ secrets.SESSION_FILE }}
-          CHANNEL_LINK: ${{ secrets.CHANNEL_LINK }}
-          EXCEL_FILE: ${{ secrets.EXCEL_FILE }}
+      - name: Run Telegram export script
         run: |
           python tg_channel_to_excel.py
 
-      - name: Upload Excel artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: channel_export
-          path: ${{ secrets.EXCEL_FILE }}
+      - name: Commit exported Excel file
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+
+          # Создаём папку export если её нет
+          mkdir -p export
+
+          # Копируем файл в папку export
+          cp channel_messages.xlsx export/channel_messages.xlsx
+
+          git add export/channel_messages.xlsx
+
+          # Если нет изменений — не коммитим
+          git diff --cached --quiet || git commit -m "Update export: $(date)"
+
+          git push
