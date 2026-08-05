@@ -25,6 +25,8 @@ jobs:
 
       - name: Run export script
         env:
+          API_ID: ${{ secrets.API_ID }}
+          API_HASH: ${{ secrets.API_HASH }}
           BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
           CHANNEL_LINK: ${{ secrets.CHANNEL_LINK }}
           EXCEL_FILE: ${{ secrets.EXCEL_FILE }}
