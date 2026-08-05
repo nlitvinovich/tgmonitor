@@ -1,59 +1,43 @@
-import os
 import asyncio
 from telethon import TelegramClient
 import pandas as pd
 
-SESSION_FILE = os.getenv("SESSION_FILE", "user.session")
-CHANNEL_LINK = os.getenv("CHANNEL_LINK")
-EXCEL_FILE = os.getenv("EXCEL_FILE", "channel_export.xlsx")
+API_ID = 30494584
+API_HASH = "239fcf1a4c472e26e3b550d1d4551dab"
+SESSION_FILE = "user.session"
 
-API_ID = int(os.getenv("API_ID"))
-API_HASH = os.getenv("API_HASH")
-
-client = TelegramClient(SESSION_FILE, API_ID, API_HASH)
-
-
-def save_to_excel(messages_data):
-    if not messages_data:
-        print("[Excel] Нет данных для сохранения")
-        return
-
-    df = pd.DataFrame(messages_data)
-
-    if "date" in df.columns:
-        df["date"] = pd.to_datetime(df["date"]).dt.tz_localize(None)
-
-    if "edit_date" in df.columns:
-        df["edit_date"] = pd.to_datetime(df["edit_date"]).dt.tz_localize(None)
-
-    df.to_excel(EXCEL_FILE, index=False)
-    print(f"[Excel] Сохранено {len(df)} сообщений в {EXCEL_FILE}")
+CHANNEL_USERNAME = "your_channel_username"  # например, "appleinsider_ru"
+OUTPUT_FILE = "channel_messages.xlsx"
 
 
 async def main():
-    await client.start()
-    print("[TG] Пользователь авторизован")
+    client = TelegramClient(SESSION_FILE, API_ID, API_HASH)
+    await client.connect()
 
-    channel = await client.get_entity(CHANNEL_LINK)
-    print(f"[TG] Выгружаем канал: {channel.title}")
+    # Проверяем авторизацию
+    if not await client.is_user_authorized():
+        print("❌ Session not authorized — recreate user.session")
+        return
 
-    messages_data = []
+    # Получаем канал
+    channel = await client.get_entity(CHANNEL_USERNAME)
 
-    async for msg in client.iter_messages(channel, limit=None):
-        messages_data.append({
-            "id": msg.id,
-            "date": msg.date,
-            "text": msg.text,
-            "edited": msg.edit_date is not None,
-            "edit_date": msg.edit_date,
-            "link": f"https://t.me/{channel.username}/{msg.id}" if channel.username else ""
+    messages = []
+    async for message in client.iter_messages(channel, limit=1000):
+        messages.append({
+            "id": message.id,
+            "date": message.date,
+            "text": message.text,
+            "views": message.views,
+            "forwards": message.forwards,
+            "replies": message.replies.replies if message.replies else 0
         })
 
-    print(f"[TG] История загружена: {len(messages_data)} сообщений")
+    # Сохраняем в Excel
+    df = pd.DataFrame(messages)
+    df.to_excel(OUTPUT_FILE, index=False)
+    print(f"✅ Exported {len(messages)} messages to {OUTPUT_FILE}")
 
-    save_to_excel(messages_data)
-
-    print("[TG] Готово. Завершаем работу.")
     await client.disconnect()
 
 
