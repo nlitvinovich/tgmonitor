@@ -7,8 +7,11 @@ BOT_TOKEN = os.getenv("BOT_TOKEN")
 CHANNEL_LINK = os.getenv("CHANNEL_LINK")
 EXCEL_FILE = os.getenv("EXCEL_FILE", "channel_export.xlsx")
 
-# Клиент бота
-client = TelegramClient("bot_session", api_id=0, api_hash="", bot_token=BOT_TOKEN)
+# Telethon требует api_id и api_hash даже для бота — можно любые
+API_ID = 123456
+API_HASH = "test"
+
+client = TelegramClient("bot_session", API_ID, API_HASH)
 
 
 def save_to_excel(messages_data):
@@ -29,7 +32,7 @@ def save_to_excel(messages_data):
 
 
 async def main():
-    await client.start()
+    await client.start(bot_token=BOT_TOKEN)
     print("[TG] Бот запущен")
 
     channel = await client.get_entity(CHANNEL_LINK)
