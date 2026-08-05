@@ -3,14 +3,14 @@ import asyncio
 from telethon import TelegramClient
 import pandas as pd
 
+# Secrets from GitHub
+API_ID = int(os.getenv("API_ID"))
+API_HASH = os.getenv("API_HASH")
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 CHANNEL_LINK = os.getenv("CHANNEL_LINK")
 EXCEL_FILE = os.getenv("EXCEL_FILE", "channel_export.xlsx")
 
-# Telethon требует api_id и api_hash даже для бота — можно любые
-API_ID = 123456
-API_HASH = "test"
-
+# Telethon client
 client = TelegramClient("bot_session", API_ID, API_HASH)
 
 
