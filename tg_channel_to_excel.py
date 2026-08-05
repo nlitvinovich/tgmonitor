@@ -3,15 +3,14 @@ import asyncio
 from telethon import TelegramClient
 import pandas as pd
 
-# Secrets from GitHub
-API_ID = int(os.getenv("API_ID"))
-API_HASH = os.getenv("API_HASH")
-BOT_TOKEN = os.getenv("BOT_TOKEN")
+SESSION_FILE = os.getenv("SESSION_FILE", "user.session")
 CHANNEL_LINK = os.getenv("CHANNEL_LINK")
 EXCEL_FILE = os.getenv("EXCEL_FILE", "channel_export.xlsx")
 
-# Telethon client
-client = TelegramClient("bot_session", API_ID, API_HASH)
+API_ID = int(os.getenv("API_ID"))
+API_HASH = os.getenv("API_HASH")
+
+client = TelegramClient(SESSION_FILE, API_ID, API_HASH)
 
 
 def save_to_excel(messages_data):
@@ -32,8 +31,8 @@ def save_to_excel(messages_data):
 
 
 async def main():
-    await client.start(bot_token=BOT_TOKEN)
-    print("[TG] Бот запущен")
+    await client.start()
+    print("[TG] Пользователь авторизован")
 
     channel = await client.get_entity(CHANNEL_LINK)
     print(f"[TG] Выгружаем канал: {channel.title}")
