@@ -28,16 +28,20 @@ jobs:
         run: |
           python tg_channel_to_excel.py
 
+      - name: Save Excel to export folder
+        run: |
+          mkdir -p export
+          if [ -f channel_messages.xlsx ]; then
+            cp channel_messages.xlsx export/channel_messages.xlsx
+          else
+            echo "❌ channel_messages.xlsx not found — export failed"
+            exit 1
+          fi
+
       - name: Commit exported Excel file
         run: |
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
-
-          # Создаём папку export если её нет
-          mkdir -p export
-
-          # Копируем файл в папку export
-          cp channel_messages.xlsx export/channel_messages.xlsx
 
           git add export/channel_messages.xlsx
 
