@@ -1,25 +1,16 @@
 import os
 import asyncio
-from dotenv import load_dotenv
 from telethon import TelegramClient
 import pandas as pd
 
-# Загружаем .env
-load_dotenv()
-
-API_ID = int(os.getenv("API_ID"))
-API_HASH = os.getenv("API_HASH")
-PHONE_NUMBER = os.getenv("PHONE_NUMBER")
+BOT_TOKEN = os.getenv("BOT_TOKEN")
 CHANNEL_LINK = os.getenv("CHANNEL_LINK")
-EXCEL_FILE = os.getenv("EXCEL_FILE")
+EXCEL_FILE = os.getenv("EXCEL_FILE", "channel_export.xlsx")
 
-# Инициализация клиента
-client = TelegramClient("session_user", API_ID, API_HASH)
+# Клиент бота
+client = TelegramClient("bot_session", api_id=0, api_hash="", bot_token=BOT_TOKEN)
 
 
-# -----------------------------
-# Сохранение в Excel
-# -----------------------------
 def save_to_excel(messages_data):
     if not messages_data:
         print("[Excel] Нет данных для сохранения")
@@ -27,7 +18,6 @@ def save_to_excel(messages_data):
 
     df = pd.DataFrame(messages_data)
 
-    # Убираем таймзоны — иначе Excel падает
     if "date" in df.columns:
         df["date"] = pd.to_datetime(df["date"]).dt.tz_localize(None)
 
@@ -38,12 +28,9 @@ def save_to_excel(messages_data):
     print(f"[Excel] Сохранено {len(df)} сообщений в {EXCEL_FILE}")
 
 
-# -----------------------------
-# Основная функция
-# -----------------------------
 async def main():
-    await client.start(PHONE_NUMBER)
-    print("[TG] Клиент запущен как пользователь")
+    await client.start()
+    print("[TG] Бот запущен")
 
     channel = await client.get_entity(CHANNEL_LINK)
     print(f"[TG] Выгружаем канал: {channel.title}")
@@ -68,8 +55,5 @@ async def main():
     await client.disconnect()
 
 
-# -----------------------------
-# Запуск
-# -----------------------------
 if __name__ == "__main__":
     asyncio.run(main())
