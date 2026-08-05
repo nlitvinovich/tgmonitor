@@ -1,1 +1,5 @@
+on:
+  schedule:
+    - cron: "0 * * * *"   # каждый час
+  workflow_dispatch:       # ручной запуск
 
