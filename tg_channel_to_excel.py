@@ -6,7 +6,7 @@ API_ID = 30494584
 API_HASH = "239fcf1a4c472e26e3b550d1d4551dab"
 SESSION_FILE = "user.session"
 
-CHANNEL_USERNAME = "https://t.me/+KB-jj5xUtPs0MGFi"
+CHANNEL_USERNAME = 1466753077
 OUTPUT_FILE = "channel_messages.xlsx"
 
 
